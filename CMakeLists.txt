@@ -14,4 +14,5 @@ project ("sdl2-tutorials")
 # Include sub-projects.
 add_subdirectory ("sdl2-tutorials/01-Setup")
 add_subdirectory ("sdl2-tutorials/02-Sprite")
-add_subdirectory ("sdl2-tutorials/03-Input")
+add_subdirectory ("sdl2-tutorials/03-Game-Loop")
+add_subdirectory ("sdl2-tutorials/04-Input")
