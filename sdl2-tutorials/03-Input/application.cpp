@@ -25,6 +25,7 @@ Application::Application(int windowWidth, int windowHeight) : windowWidth(window
 		std::cout << "Couldn't create renderer: " << SDL_GetError() << std::endl;
 		exit(1);
 	}
+	keys = SDL_GetKeyboardState(nullptr);
 
 	// initialize extensions
 	IMG_Init(IMG_INIT_PNG);
@@ -36,6 +37,13 @@ Application::Application(int windowWidth, int windowHeight) : windowWidth(window
 	grass1 = Sprite::load("data/grass1.png", renderer);
 	ball = Sprite::load("data/ball.png", renderer);
 	spike = Sprite::load("data/spike.png", renderer);
+
+	// initialize game
+	ballPos.x = static_cast<float>(width / 2 - ball.w() / 2);
+	ballXAccel = 0.05f;
+	ballXSpeed = 0;
+	ballXMaxSpeed = 20.0f;
+	prevTime = SDL_GetTicks();
 }
 
 Application::~Application()
@@ -57,10 +65,18 @@ void Application::draw(const Sprite &sprite, int xPos, int yPos)
 
 void Application::gameLoop()
 {
-	SDL_Event event;
 	bool running = true;
+	float interval = 1.0f / 60;
+	float accumulator = 0;
+
+	SDL_Event event;
 	while (running)
 	{
+		uint32_t currentTime = SDL_GetTicks();
+		uint32_t delta = currentTime - prevTime;
+		float dt = delta / 1000.0f;
+		prevTime = currentTime;
+
 		while (SDL_PollEvent(&event))
 		{
 			switch (event.type)
@@ -72,10 +88,37 @@ void Application::gameLoop()
 			}
 		}
 
+		accumulator += dt;
+		while (accumulator >= interval)
+		{
+			if (keys[SDL_SCANCODE_A])
+			{
+				if (ballXSpeed > -ballXMaxSpeed)
+				{
+					ballXSpeed -= ballXAccel;
+				}
+			}
+			else if (keys[SDL_SCANCODE_D])
+			{
+				if (ballXSpeed < ballXMaxSpeed)
+				{
+					ballXSpeed += ballXAccel;
+				}
+			}
+			else
+			{
+				ballXSpeed *= 0.99f;
+				if (abs(ballXSpeed) < 0.01f) ballXSpeed = 0;
+			}
+			ballPos.x += ballXSpeed * interval;
+			accumulator -= dt;
+		}
+
+		// draw the game scene
 		SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
 		SDL_RenderClear(renderer);
 
-		// draw game sprites
+		// draw the grass
 		const int numTiles = 50;
 		for (int x = 0; x < numTiles * grass1.w(); x += grass1.w())
 		{
@@ -83,7 +126,7 @@ void Application::gameLoop()
 			draw(grass1, x, y);
 		}
 
-		draw(ball, width / 2 - ball.w() / 2, height - grass1.h() - ball.h());
+		draw(ball, static_cast<int>(ballPos.x), height - grass1.h() - ball.h());
 		draw(spike, 200, height - spike.h() - grass1.h());
 
 		// swap buffers
