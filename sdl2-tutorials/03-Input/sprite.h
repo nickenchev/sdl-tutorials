@@ -7,11 +7,11 @@
 class Sprite
 {
 	SDL_Texture *tex;
-	int w, h;
+	int width, height;
 
 public:
-	Sprite() : w(0), h(0), tex(nullptr) {}
-	Sprite(int width, int height, SDL_Texture *texture) : w(width), h(height)
+	Sprite() : width(0), height(0), tex(nullptr) {}
+	Sprite(int width, int height, SDL_Texture *texture) : width(width), height(height)
 	{
 		this->tex = texture;
 	}
@@ -24,8 +24,8 @@ public:
 		}
 	}
 
-	int width() const { return w; }
-	int height() const { return h; }
+	int w() const { return width; }
+	int h() const { return height; }
 	SDL_Texture *texture() const { return tex; }
 
 	static Sprite load(const std::string &filePath, SDL_Renderer *renderer)

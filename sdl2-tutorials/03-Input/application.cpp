@@ -12,9 +12,7 @@ Application::Application(int windowWidth, int windowHeight) : windowWidth(window
 		exit(1);
 	}
 
-	IMG_Init(IMG_INIT_PNG);
-
-	window = SDL_CreateWindow("SDL2 Tutorials", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, windowWidth, windowHeight, 0);
+	window = SDL_CreateWindow("SDL2 Input", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, windowWidth, windowHeight, SDL_WINDOW_SHOWN | SDL_WINDOW_RESIZABLE);
 	if (!window)
 	{
 		std::cout << "Couldn't create the application window:" << SDL_GetError() << std::endl;
@@ -28,14 +26,16 @@ Application::Application(int windowWidth, int windowHeight) : windowWidth(window
 		exit(1);
 	}
 
-	// set a logical resolution, independant of the actual screen/window resolution
+	// initialize extensions
+	IMG_Init(IMG_INIT_PNG);
+
+	// configure a logical resolution
 	SDL_RenderSetLogicalSize(renderer, width, height);
 
 	// load assets
 	grass1 = Sprite::load("data/grass1.png", renderer);
 	ball = Sprite::load("data/ball.png", renderer);
 	spike = Sprite::load("data/spike.png", renderer);
-	gameSetup();
 }
 
 Application::~Application()
@@ -51,32 +51,8 @@ Application::~Application()
 
 void Application::draw(const Sprite &sprite, int xPos, int yPos)
 {
-	SDL_Rect rect{ .x = xPos, .y = yPos, .w = sprite.width(), .h = sprite.height() };
+	SDL_Rect rect{ .x = xPos, .y = yPos, .w = sprite.w(), .h = sprite.h() };
 	SDL_RenderCopy(renderer, sprite.texture(), nullptr, &rect);
-}
-
-void Application::gameSetup()
-{
-	ballX = static_cast<float>(width / 2 - ball.width());
-	ballY = static_cast<float>(height - grass1.height() - ball.height());
-	moveDirection = MoveDirection::none;
-}
-
-void Application::processKey(SDL_Keycode keycode, bool isDown)
-{
-	switch (keycode)
-	{
-		case SDLK_a:
-		{
-			moveDirection = isDown ? MoveDirection::left : MoveDirection::none;
-			break;
-		}
-		case SDLK_d:
-		{
-			moveDirection = isDown ? MoveDirection::right : MoveDirection::none;
-			break;
-		}
-	}
 }
 
 void Application::gameLoop()
@@ -89,16 +65,6 @@ void Application::gameLoop()
 		{
 			switch (event.type)
 			{
-				case SDL_KEYDOWN:
-				{
-					processKey(event.key.keysym.sym, true);
-					break;
-				}
-				case SDL_KEYUP:
-				{
-					processKey(event.key.keysym.sym, false);
-					break;
-				}
 				case SDL_QUIT:
 				{
 					running = false;
@@ -106,29 +72,19 @@ void Application::gameLoop()
 			}
 		}
 
-		if (moveDirection == MoveDirection::left)
-		{
-			ballX -= 0.1f;
-		}
-		if (moveDirection == MoveDirection::right)
-		{
-			ballX += 0.1f;
-		}
-
-		// clear the background
-		SDL_SetRenderDrawColor(renderer, 203, 219, 252, 255);
+		SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
 		SDL_RenderClear(renderer);
 
 		// draw game sprites
 		const int numTiles = 50;
-		for (int x = 0; x < numTiles * grass1.width(); x += grass1.width())
+		for (int x = 0; x < numTiles * grass1.w(); x += grass1.w())
 		{
-			int y = height - grass1.height();
+			int y = height - grass1.h();
 			draw(grass1, x, y);
 		}
 
-		draw(ball, static_cast<int>(ballX), static_cast<int>(ballY));
-		draw(spike, 200, height - spike.height()- grass1.height());
+		draw(ball, width / 2 - ball.w() / 2, height - grass1.h() - ball.h());
+		draw(spike, 200, height - spike.h() - grass1.h());
 
 		// swap buffers
 		SDL_RenderPresent(renderer);

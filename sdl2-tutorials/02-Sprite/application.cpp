@@ -4,7 +4,8 @@
 #include <SDL.h>
 #include <SDL_image.h>
 
-Application::Application(int windowWidth, int windowHeight) : windowWidth(windowWidth), windowHeight(windowHeight), width(640), height(360)
+Application::Application(int windowWidth, int windowHeight)
+	: windowWidth(windowWidth), windowHeight(windowHeight), width(640), height(360)
 {
 	if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_EVENTS) != 0)
 	{
@@ -12,9 +13,7 @@ Application::Application(int windowWidth, int windowHeight) : windowWidth(window
 		exit(1);
 	}
 
-	IMG_Init(IMG_INIT_PNG);
-
-	window = SDL_CreateWindow("SDL2 Tutorials", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, windowWidth, windowHeight, 0);
+	window = SDL_CreateWindow("SDL2 Input", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, windowWidth, windowHeight, SDL_WINDOW_SHOWN | SDL_WINDOW_RESIZABLE);
 	if (!window)
 	{
 		std::cout << "Couldn't create the application window:" << SDL_GetError() << std::endl;
@@ -28,7 +27,10 @@ Application::Application(int windowWidth, int windowHeight) : windowWidth(window
 		exit(1);
 	}
 
-	// set a logical resolution, independant of the actual screen/window resolution
+	// initialize extensions
+	IMG_Init(IMG_INIT_PNG);
+
+	// configure a logical resolution
 	SDL_RenderSetLogicalSize(renderer, width, height);
 
 	// load assets
@@ -50,7 +52,7 @@ Application::~Application()
 
 void Application::draw(const Sprite &sprite, int xPos, int yPos)
 {
-	SDL_Rect rect{ .x = xPos, .y = yPos, .w = sprite.width(), .h = sprite.height() };
+	SDL_Rect rect{ .x = xPos, .y = yPos, .w = sprite.w(), .h = sprite.h() };
 	SDL_RenderCopy(renderer, sprite.texture(), nullptr, &rect);
 }
 
@@ -71,20 +73,19 @@ void Application::gameLoop()
 			}
 		}
 
-		// clear the background
-		SDL_SetRenderDrawColor(renderer, 203, 219, 252, 255);
+		SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
 		SDL_RenderClear(renderer);
 
 		// draw game sprites
 		const int numTiles = 50;
-		for (int x = 0; x < numTiles * grass1.width(); x += grass1.width())
+		for (int x = 0; x < numTiles * grass1.w(); x += grass1.w())
 		{
-			int y = height - grass1.height();
+			int y = height - grass1.h();
 			draw(grass1, x, y);
 		}
 
-		draw(ball, width / 2 - ball.width() / 2, height - grass1.height() - ball.height());
-		draw(spike, 200, height - spike.height()- grass1.height());
+		draw(ball, width / 2 - ball.w() / 2, height - grass1.h() - ball.h());
+		draw(spike, 200, height - spike.h() - grass1.h());
 
 		// swap buffers
 		SDL_RenderPresent(renderer);

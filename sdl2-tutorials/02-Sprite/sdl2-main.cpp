@@ -6,7 +6,7 @@
 
 int main(int argc, char *argv[])
 {
-	Application app(1280, 720);
+	Application app(1920, 1080);
 	app.gameLoop();
 
 	return 0;

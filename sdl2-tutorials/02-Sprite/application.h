@@ -9,7 +9,8 @@ class Application
 {
 	SDL_Window *window;
 	SDL_Renderer *renderer;
-	int width, height, windowWidth, windowHeight;
+	const int width, height;
+	int windowWidth, windowHeight;
 
 	Sprite grass1, ball, spike;
 

@@ -10,7 +10,7 @@ Application::Application(int width, int height) : width(width), height(height)
 		exit(1);
 	}
 
-	window = SDL_CreateWindow("SDL2 Tutorials", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, width, height, 0);
+	window = SDL_CreateWindow("SDL2 Setup", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, width, height, 0);
 	if (!window)
 	{
 		std::cout << "Couldn't create the application window:" << SDL_GetError() << std::endl;

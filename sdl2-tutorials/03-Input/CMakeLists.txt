@@ -4,7 +4,8 @@ find_package(SDL2_image REQUIRED)
 add_executable(sdl2-input
 	sdl2-main.cpp
 	application.h
-	application.cpp "sprite.h")
+	application.cpp
+	sprite.h)
 
 target_link_libraries(sdl2-input PRIVATE SDL2::SDL2 SDL2::SDL2main SDL2_image::SDL2_image)
 
