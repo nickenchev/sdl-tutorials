@@ -40,9 +40,9 @@ Application::Application(int windowWidth, int windowHeight) : windowWidth(window
 
 	// initialize game
 	ballPos.x = static_cast<float>(width / 2 - ball.w() / 2);
-	ballXAccel = 0.05f;
+	ballXAccel = 20.0f;
 	ballXSpeed = 0;
-	ballXMaxSpeed = 20.0f;
+	ballXMaxSpeed = 300.0f;
 	prevTime = SDL_GetTicks();
 }
 
@@ -73,8 +73,7 @@ void Application::gameLoop()
 	while (running)
 	{
 		uint32_t currentTime = SDL_GetTicks();
-		uint32_t delta = currentTime - prevTime;
-		float dt = delta / 1000.0f;
+		float dt = (currentTime - prevTime) / 1000.0f;
 		prevTime = currentTime;
 
 		while (SDL_PollEvent(&event))
@@ -84,6 +83,13 @@ void Application::gameLoop()
 				case SDL_QUIT:
 				{
 					running = false;
+				}
+				case SDL_KEYUP:
+				{
+					if (event.key.keysym.sym == SDLK_SPACE)
+					{
+					}
+					break;
 				}
 			}
 		}
@@ -107,11 +113,11 @@ void Application::gameLoop()
 			}
 			else
 			{
-				ballXSpeed *= 0.99f;
+				ballXSpeed *= 0.85f;
 				if (abs(ballXSpeed) < 0.01f) ballXSpeed = 0;
 			}
 			ballPos.x += ballXSpeed * interval;
-			accumulator -= dt;
+			accumulator -= interval;
 		}
 
 		// draw the game scene
