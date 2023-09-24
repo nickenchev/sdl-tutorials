@@ -363,3 +363,4 @@ MigrationBackup/
 FodyWeavers.xsd
 /SDL2.dll
 /SDL2_image.dll
+/CMakePresets.json
