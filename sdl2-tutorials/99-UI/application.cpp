@@ -6,9 +6,7 @@
 #include <SDL_image.h>
 #include <variant>
 
-std::array<std::array<int, 3>, 50> colors;
-
-Application::Application(int windowWidth, int windowHeight) : windowWidth(windowWidth), windowHeight(windowHeight), width(640), height(360), rootWidget(UI::Panel())
+Application::Application(int windowWidth, int windowHeight) : windowWidth(windowWidth), windowHeight(windowHeight), width(640), height(360), rootWidget(UI::Spacer())
 {
 	if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_EVENTS) != 0)
 	{
@@ -49,52 +47,35 @@ Application::Application(int windowWidth, int windowHeight) : windowWidth(window
 	ballXMaxSpeed = 300.0f;
 	prevTime = SDL_GetTicks();
 
-	//Layout *layout1 = new Layout(LayoutDirection::horizontal);
-	//layout1->addChild(new Spacer());
-	//layout1->addChild(new Spacer());
-
-	//Layout *layout2 = new Layout(LayoutDirection::vertical);
-	//layout2->addChild(new Panel());
-	//layout2->addChild(new Panel());
-	//layout2->addChild(new Panel());
-	//layout2->addChild(new Panel());
-	//layout2->addChild(new Panel());
-	//layout1->addChild(layout2);
-
-	//// calculate the layout
-	//rootWidget.addChild(layout1);
-	//rootWidget.layout(Rect(0, 0, width, height));
-
 	rootWidget.setLayout(UI::HorizontalLayout());
 	rootWidget.setRect(UI::Rect(0, 0, static_cast<float>(width), static_cast<float>(height)));
-	rootWidget.addChild(UI::Widget{ UI::Panel() });
-	rootWidget.addChild(UI::Widget{ UI::Panel() });
+	rootWidget.addChild(UI::Spacer());
+	rootWidget.addChild(UI::Spacer());
 
-	auto &rightPanel = rootWidget.addChild(UI::Widget{ UI::Panel() });
+	auto &rightPanel = rootWidget.addChild(UI::Spacer());
 	rightPanel.setLayout(UI::VerticalLayout());
-	rightPanel.addChild(UI::Widget{ UI::Panel() });
-	rightPanel.addChild(UI::Widget{ UI::Panel() });
-	rightPanel.addChild(UI::Widget{ UI::Panel() });
+	UI::Widget &panel = rightPanel.addChild(UI::Panel(UI::Color4(0, 0, 255, 100)));
+	panel.addChild(UI::Panel(UI::Color4(255, 0, 255, 255)));
+	panel.addChild(UI::Panel(UI::Color4(255, 0, 255, 255)));
+	panel.addChild(UI::Spacer());
+	rightPanel.addChild(UI::Spacer());
 
 	UI::LayoutVisitor visitor;
 	visitor.layout(rootWidget);
-
-	for (auto &c : colors)
-	{
-		c[0] = rand() % 255;
-		c[1] = rand() % 255;
-		c[2] = rand() % 255;
-	}
 }
 
 void Application::drawUI(UI::Widget &widget, int i)
 {
-	auto &color = colors[i % colors.size()];
+	if (std::holds_alternative<UI::Panel>(widget.getControl()))
+	{
+		const UI::Panel panel = std::get<UI::Panel>(widget.getControl());
+		UI::Color4 backgroundColor = panel.getBackgroundColor();
 
-	UI::Rect rect = widget.getRect();
-	SDL_Rect box{ .x = static_cast<int>(rect.x), .y = static_cast<int>(rect.y), .w = static_cast<int>(rect.width), .h = static_cast<int>(rect.height) };
-	SDL_SetRenderDrawColor(renderer, color[0], color[1], color[2], 255);
-	SDL_RenderFillRect(renderer, &box);
+		UI::Rect rect = widget.getRect();
+		SDL_Rect box{ .x = static_cast<int>(rect.x), .y = static_cast<int>(rect.y), .w = static_cast<int>(rect.width), .h = static_cast<int>(rect.height) };
+		SDL_SetRenderDrawColor(renderer, backgroundColor.r, backgroundColor.g, backgroundColor.b, backgroundColor.a);
+		SDL_RenderFillRect(renderer, &box);
+	}
 
 	for (auto &child : widget.getChildren())
 	{

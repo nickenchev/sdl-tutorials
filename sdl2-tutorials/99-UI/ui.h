@@ -6,6 +6,14 @@
 
 namespace UI
 {
+	struct Color4
+	{
+		int r, g, b, a;
+
+		Color4() : r(0), g(0), b(0), a(0) {}
+		Color4(int r, int g, int b, int a) : r(r), g(g), b(b), a(a) {}
+	};
+
 	struct Rect
 	{
 		float x, y, width, height;
@@ -113,10 +121,23 @@ namespace UI
 	};
 	*/
 
-	class HorizontalLayout {};
-	class VerticalLayout {};
+	class StandardLayout
+	{
+		float left, right, top, bottom;
+	};
 
-	class Panel {};
+	class HorizontalLayout : public StandardLayout {};
+	class VerticalLayout : public StandardLayout {};
+
+	class Panel {
+		Color4 backgroundColor;
+
+	public:
+		Panel(const Color4 backgroundColor) : backgroundColor(backgroundColor) { }
+
+		Color4 getBackgroundColor() const { return backgroundColor; }
+	};
+
 	class Spacer {};
 	class Label
 	{
@@ -142,9 +163,9 @@ namespace UI
 			this->control = control;
 		}
 
-		Widget &addChild(Widget &&widget)
+		Widget &addChild(Control &&control)
 		{
-			children.push_back(widget);
+			children.push_back(Widget(control));
 			return children[children.size() - 1];
 		}
 
@@ -198,7 +219,7 @@ namespace UI
 			for (auto &childWidget : widget.getChildren())
 			{
 				float childWidth = parentRect.width / static_cast<int>(widget.getChildren().size());
-				Rect childRect{ childWidth * i, 0, childWidth, parentRect.height };
+				Rect childRect{ childWidth * i, 0, childWidth, parentRect.height};
 				childWidget.setRect(childRect);
 				++i;
 			}
@@ -207,12 +228,20 @@ namespace UI
 		void operator()(VerticalLayout &layout, Widget &widget)
 		{
 			const Rect parentRect = widget.getRect();
-			int i = 0;
+			float spacing = 5;
+			float left = 5;
+			float right = 5;
+			float top = 5;
+			float bottom = 5;
 
+			const float availW = parentRect.width - (left + right);
+			const float availH = parentRect.height - (top + bottom);
+
+			int i = 0;
 			for (auto &childWidget : widget.getChildren())
 			{
 				float childHeight = parentRect.height / static_cast<int>(widget.getChildren().size());
-				Rect childRect{ parentRect.x, childHeight * i, parentRect.width, childHeight };
+				Rect childRect{ parentRect.x + left, childHeight * i + top, availW, childHeight};
 				childWidget.setRect(childRect);
 				++i;
 			}
